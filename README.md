@@ -155,7 +155,7 @@ Create a `.env` file in the `backend/` folder:
 
 ```env
 PORT=5000
-MONGO_URI=mongodb+srv://your-username:your-password@cluster.mongodb.net/preppilot?retryWrites=true&w=majority
+MONGO_URI=<your mongodb url>
 JWT_SECRET=your_jwt_secret_key_here
 GEMINI_API_KEY=your_gemini_api_key_here
 ```
