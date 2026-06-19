@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
+import { signInWithPopup } from "firebase/auth";
+import { auth, googleProvider } from "../firebase";
 
 const Login = () => {
   const { login } = useAuth();
@@ -10,9 +12,33 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
+  // 🔥 Google Login
+  const handleGoogleLogin = async () => {
+    setError('');
+    setGoogleLoading(true);
+
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+
+      console.log("Google User:", user);
+
+      // optional: backend send karna ho to yaha karo
+
+      navigate('/');
+    } catch (err) {
+      setError(err.message || "Google login failed");
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
+  // 🔐 Email login
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!email || !password) {
       setError('Please fill in all fields');
       return;
@@ -34,23 +60,31 @@ const Login = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
       <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-xl shadow-md p-8">
+
         {/* Header */}
         <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-white">📋 PrepPilot</h1>
-          <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Sign in to your account</p>
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
+            📋 PrepPilot
+          </h1>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
+            Sign in to your account
+          </p>
         </div>
 
-        {/* Error message */}
+        {/* Error */}
         {error && (
           <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm p-3 rounded-lg mb-4">
             {error}
           </div>
         )}
 
-        {/* Login form */}
+        {/* Email/Password Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
+
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Email
+            </label>
             <input
               type="email"
               value={email}
@@ -62,7 +96,9 @@ const Login = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Password
+            </label>
             <input
               type="password"
               value={password}
@@ -82,6 +118,29 @@ const Login = () => {
           </button>
         </form>
 
+        {/* OR divider */}
+        <div className="my-4 flex items-center gap-2">
+          <div className="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
+          <span className="text-xs text-gray-400">OR</span>
+          <div className="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
+        </div>
+
+        {/* Google Login */}
+        <button
+          type="button"
+          onClick={handleGoogleLogin}
+          disabled={googleLoading}
+          className="w-full flex items-center justify-center gap-2 border border-gray-300 dark:border-gray-600 py-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+        >
+          <img
+            src="https://www.svgrepo.com/show/475656/google-color.svg"
+            alt="Google"
+            className="w-5 h-5"
+          />
+
+          {googleLoading ? 'Signing in...' : 'Continue with Google'}
+        </button>
+
         {/* Register link */}
         <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
           Don't have an account?{' '}
@@ -89,6 +148,7 @@ const Login = () => {
             Sign up
           </Link>
         </p>
+
       </div>
     </div>
   );
