@@ -43,8 +43,21 @@ const __dirname = path.dirname(__filename);
 const app = express();
 
 // Standard Middlewares
+// Allow common local dev client origins and override with CLIENT_URL in production
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  'http://localhost:5173', // Vite default
+  'http://127.0.0.1:5173',
+  'http://localhost:3000'
+].filter(Boolean);
+
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173', // Vite default port
+  origin: (origin, cb) => {
+    // Allow requests with no origin like Postman or server-to-server
+    if (!origin) return cb(null, true);
+    if (allowedOrigins.includes(origin)) return cb(null, true);
+    return cb(new Error('Not allowed by CORS'));
+  },
   credentials: true
 }));
 app.use(express.json());

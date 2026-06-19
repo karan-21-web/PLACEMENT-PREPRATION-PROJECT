@@ -1,7 +1,7 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import api from '../services/api';
 
-const AuthContext = createContext(null);
+ export const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -61,6 +61,25 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  const googleLogin = async (firebaseUser) => {
+  try {
+    const response = await api.post('/auth/google', {
+      name: firebaseUser.displayName,
+      email: firebaseUser.email,
+      photo: firebaseUser.photoURL,
+    });
+
+    const { token, ...userData } = response.data;
+
+    localStorage.setItem('preppilot_token', token);
+    setUser(userData);
+
+    return userData;
+  } catch (error) {
+    throw error;
+  }
+};
+
   // Update profile handler
   const updateProfile = async (profileData) => {
     try {
@@ -73,16 +92,11 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, updateProfile }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, updateProfile,  googleLogin  }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
+// Note: `useAuth` hook is provided in `src/hooks/useAuth.js` to avoid
+// duplicate hook definitions across the codebase.

@@ -5,7 +5,7 @@ import { signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "../firebase";
 
 const Login = () => {
-  const { login } = useAuth();
+  const { login, googleLogin } = useAuth();
   const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
@@ -16,24 +16,25 @@ const Login = () => {
 
   // 🔥 Google Login
   const handleGoogleLogin = async () => {
-    setError('');
-    setGoogleLoading(true);
+  setError('');
+  setGoogleLoading(true);
 
-    try {
-      const result = await signInWithPopup(auth, googleProvider);
-      const user = result.user;
+  try {
+    const result = await signInWithPopup(auth, googleProvider);
+    const user = result.user;
 
-      console.log("Google User:", user);
+    console.log("Google User:", user);
 
-      // optional: backend send karna ho to yaha karo
+    // ✅ IMPORTANT LINE (THIS WAS MISSING)
+    await googleLogin(user);
 
-      navigate('/');
-    } catch (err) {
-      setError(err.message || "Google login failed");
-    } finally {
-      setGoogleLoading(false);
-    }
-  };
+    navigate('/');
+  } catch (err) {
+    setError(err.message || "Google login failed");
+  } finally {
+    setGoogleLoading(false);
+  }
+};
 
   // 🔐 Email login
   const handleSubmit = async (e) => {

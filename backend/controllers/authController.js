@@ -2,7 +2,8 @@ import {
   registerStudent, 
   authenticateStudent, 
   getUserProfile as fetchUserProfile, 
-  updateUserProfile as modifyUserProfile 
+  updateUserProfile as modifyUserProfile,
+  findOrCreateGoogleUser
 } from '../services/authService.js';
 import generateToken from '../utils/generateToken.js';
 
@@ -68,6 +69,36 @@ export const loginUser = async (req, res, next) => {
     });
   } catch (error) {
     res.status(401);
+    next(error);
+  }
+};
+
+/**
+ * @desc    Sign in with Google (called after Firebase client sign-in)
+ * @route   POST /api/auth/google
+ * @access  Public
+ */
+export const googleAuth = async (req, res, next) => {
+  const { name, email, photo } = req.body;
+
+  if (!email || !name) {
+    res.status(400);
+    return next(new Error('Missing required Google user fields: name and email'));
+  }
+
+  try {
+    const user = await findOrCreateGoogleUser(name, email, photo);
+    const token = generateToken(user._id);
+
+    res.status(200).json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      profile: user.profile,
+      token
+    });
+  } catch (error) {
+    res.status(500);
     next(error);
   }
 };

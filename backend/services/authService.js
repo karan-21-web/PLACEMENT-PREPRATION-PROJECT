@@ -103,3 +103,30 @@ export const updateUserProfile = async (userId, profileData) => {
   delete userObj.password;
   return userObj;
 };
+
+/**
+ * Find a user by email or create a new one for Google sign-in
+ * @param {string} name
+ * @param {string} email
+ * @param {string} photo
+ * @returns {Object} user document
+ */
+export const findOrCreateGoogleUser = async (name, email, photo) => {
+  const normalizedEmail = email.toLowerCase();
+
+  let user = await User.findOne({ email: normalizedEmail });
+  if (user) {
+    return user;
+  }
+
+  // Generate a random password to satisfy schema requirements
+  const randomPassword = Math.random().toString(36).slice(-12) + 'Aa1!';
+
+  user = await User.create({
+    name,
+    email: normalizedEmail,
+    password: randomPassword
+  });
+
+  return user;
+};
