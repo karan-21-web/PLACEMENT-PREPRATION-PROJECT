@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import DSAProblemModal from '../components/tracker/DSAProblemModal';
+import LeetCodeConnect from '../components/tracker/LeetCodeConnect';
 
 const TOPICS = ['All Topics', 'Arrays', 'Strings', 'Linked List', 'Trees', 'Graphs', 'DP', 'Greedy', 'Backtracking', 'Sorting', 'Searching', 'Stack', 'Queue', 'Hashing', 'Math', 'Bit Manipulation', 'Other'];
 const PLATFORMS = ['All Platforms', 'LeetCode', 'GFG', 'Coding Ninjas', 'Codeforces', 'HackerRank', 'Other'];
@@ -19,6 +20,14 @@ const DsaTracker = () => {
   // Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProblem, setSelectedProblem] = useState(null);
+
+  // LeetCode panel toggle
+  const [showLeetCode, setShowLeetCode] = useState(false);
+
+  // Called after LeetCode sync — refresh the list if new problems were added
+  const handleSyncDone = (addedCount) => {
+    if (addedCount > 0) fetchProblems();
+  };
 
   // Fetch problems from API
   const fetchProblems = async () => {
@@ -93,13 +102,24 @@ const DsaTracker = () => {
           <h1 className="text-2xl font-bold text-gray-800 dark:text-white">DSA Tracker</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400">Track your solved problems</p>
         </div>
-        <button
-          onClick={() => { setSelectedProblem(null); setIsModalOpen(true); }}
-          className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
-        >
-          + Log Problem
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={() => setShowLeetCode(!showLeetCode)}
+            className="border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+          >
+            🔗 {showLeetCode ? 'Hide LeetCode' : 'Connect LeetCode'}
+          </button>
+          <button
+            onClick={() => { setSelectedProblem(null); setIsModalOpen(true); }}
+            className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+          >
+            + Log Problem
+          </button>
+        </div>
       </div>
+
+      {/* LeetCode connect panel (toggled) */}
+      {showLeetCode && <LeetCodeConnect onSyncDone={handleSyncDone} />}
 
       {/* Quick stats */}
       <div className="grid grid-cols-4 gap-3">

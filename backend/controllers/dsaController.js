@@ -4,7 +4,9 @@ import {
   getProblemById,
   updateProblem as updateProblemService,
   deleteProblem as deleteProblemService,
-  getDSAStats
+  getDSAStats,
+  fetchLeetCodeData,
+  syncLeetCodeProblems as syncLeetCodeService,
 } from '../services/dsaService.js';
 
 /**
@@ -99,6 +101,44 @@ export const getDSADashboardStats = async (req, res, next) => {
     res.status(200).json(stats);
   } catch (error) {
     res.status(500);
+    next(error);
+  }
+};
+
+/**
+ * @desc    Fetch public LeetCode profile stats + recent accepted submissions
+ * @route   GET /api/dsa/leetcode/:username
+ * @access  Private
+ */
+export const getLeetCodeProfile = async (req, res, next) => {
+  try {
+    const { username } = req.params;
+    const data = await fetchLeetCodeData(username.trim());
+    res.status(200).json(data);
+  } catch (error) {
+    res.status(400);
+    next(error);
+  }
+};
+
+/**
+ * @desc    Bulk-import LeetCode problems, skipping existing duplicates
+ * @route   POST /api/dsa/leetcode/sync
+ * @access  Private
+ */
+export const syncLeetCode = async (req, res, next) => {
+  try {
+    const { problems } = req.body;
+
+    if (!Array.isArray(problems) || problems.length === 0) {
+      res.status(400);
+      return next(new Error('A non-empty problems array is required.'));
+    }
+
+    const result = await syncLeetCodeService(req.user._id, problems);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(400);
     next(error);
   }
 };

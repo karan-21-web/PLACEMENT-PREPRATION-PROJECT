@@ -5,7 +5,9 @@ import {
   getProblem,
   editProblem,
   removeProblem,
-  getDSADashboardStats
+  getDSADashboardStats,
+  getLeetCodeProfile,
+  syncLeetCode,
 } from '../controllers/dsaController.js';
 import { protect } from '../middleware/authMiddleware.js';
 import { validate, dsaValidator } from '../middleware/validationMiddleware.js';
@@ -17,6 +19,10 @@ router.use(protect);
 
 // Dashboard stats aggregation (must be before :id routes)
 router.get('/stats', getDSADashboardStats);
+
+// LeetCode integration (must be before /:id to avoid route collision)
+router.get('/leetcode/:username', getLeetCodeProfile);
+router.post('/leetcode/sync', syncLeetCode);
 
 // Base CRUD endpoints
 router.get('/', listProblems);
